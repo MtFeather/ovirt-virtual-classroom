@@ -1,0 +1,18 @@
+{
+     // Unique name of the plugin
+     "name": "virtual-classroom",
+
+     // URL of plugin host page that bootstraps plugin code
+     // This URL maps to $ENGINE_USR/ui-plugins/kubernetes-resource/plugin.html
+     "url": "plugin/virtual-classroom/plugin.html",
+
+     // Path to plugin resource files relative to descriptor
+     // This path maps to $ENGINE_USR/ui-plugins/kubernetes-resources
+     "resourcePath": "virtual-classroom-resources",
+
+     // Default configuration associated with the plugin
+     "config": {
+        "allowedOrigins": ["https://127.0.0.1"],
+        "apiEntryPoint": "https://127.0.0.1/ovirt-engine/api"
+     }
+}

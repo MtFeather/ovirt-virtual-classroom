@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/ovirt-engine/webadmin/theme/00-ovirt.brand/bundled/jquery/jquery.min.js"></script>
+    <script type='text/javascript'>
+      var api = parent.pluginApi('virtual-classroom');
+      var VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM = ':';
+      var VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX = 'virtual-class-plugin';
+      var url = api.engineBaseUrl();
+      // Get runtime plugin configuration, i.e. custom configuration (if any)
+      // merged on top of default configuration (if any)
+      var config = api.configObject();
+
+      function init(apiEntryPoint){
+        api.addPrimaryMenuContainer('Virtual Class', 'virtual-class',
+          {
+            priority: 1, // negative priority will be the top menu item.
+            icon: 'fa-cube' // font-awesome trophy icon.
+          }
+        );
+        api.addSecondaryMenuPlace('virtual-class', 'Curriculum', 'curriculum',
+          '/ovirt-ui-plugins/virtual-classroom/virtual-classroom-resources/curriculum.html'
+        );
+      }
+
+      function getUser(apiEntryPoint) {
+        var users = new Array();
+        var usersUrl = apiEntryPoint + "/users";
+        jQuery.ajax({
+          type: "GET",
+          dataType: "json",
+          url: usersUrl,
+          headers: {'Authorization': 'Bearer ' + api.ssoToken()},
+          success: function(data) {
+            for (var index in data.user) {
+              users[index] = data.user[index].name;
+            }
+            formWindow && formWindow.getUsers(users);
+          }
+        });
+      }
+
+      api.options({
+        // Configure source origin(s), i.e. protocol://domain:port
+        // from which HTML5 message events will be accepted
+        allowedMessageOrigins: config.allowedOrigins
+      });
+
+      api.register({
+        UiInit: function(){
+          init(config.apiEntryPoint);
+        },
+        MessageReceived: function(data, sourceWindow) {
+          if (typeof data !== 'string') {
+              return;
+          }
+
+          var tuple = data.split(VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM);
+            if (tuple[0] !== VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX) {
+                return;
+          }
+
+          switch (tuple[1]) {
+            case 'GetUsers':
+              formWindow = sourceWindow;
+              getUser(config.apiEntryPoint);
+              break;
+          }
+        }
+      });
+      api.ready();
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
