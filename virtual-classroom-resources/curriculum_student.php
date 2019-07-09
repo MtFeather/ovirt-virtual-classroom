@@ -1,3 +1,6 @@
+<?php
+  $classId = htmlspecialchars($_GET['id'], ENT_QUOTES, 'UTF-8');
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -98,8 +101,15 @@
         <div class="col-sm-12">
           <ol class="breadcrumb">
               <li class="active">Virtual Class</li>
-              <li class="active"><a href="#curriculum">Curriculum</a></li>
+              <li class="active"><a href="curriculum.html">Curriculum</a></li>
+              <li class="active"><a href="javascript:;" style="font-size: 28px;" id="curriculum_name"></a></li>
             </ol>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <span>Teacher: <i id="teacher"></i>, </span>
+          <span>Max number of peaple: <i id="maxnum"></i></span>
         </div>
       </div>
       <div class="toolbar-pf">
@@ -108,7 +118,7 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="input-group">
-                  <span class="input-group-addon">Curriculums:</span>
+                  <span class="input-group-addon">Student:</span>
                   <input type="text" class="form-control" id="SearchPanelView_searchStringInput">
                   <span class="input-group-btn">
                     <button type="button" class="btn btn-default" id="SearchPanelView_searchClean"><i class="fa fa-close"></i> </button>
@@ -118,22 +128,20 @@
             </div>
           </div>
           <div class="form-group">
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#newModal" id="newBtn">New</button>
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editModal" id="editBtn" disabled>Edit</button>
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#deleteModal" id="deleteBtn" disabled>Delete</button>
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#addModal" id="addBtn" disabled>Add student</button>
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editModal" id="editBtn">Edit</button>
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#deleteModal" id="deleteBtn">Delete</button>
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#addModal" id="addBtn">Add student</button>
             <button type="button" class="btn btn-default" data-toggle="modal" data-target="#removeModal" id="removeBtn" disabled>Remove student</button>
           </div>
         </div>
       </div>
       <div class="GKGFBNLBCNB table-responsive">
-        <table id="curriculums_table" class="table table-bordered table-striped table-hover">
+        <table id="students_table" class="table table-bordered table-striped table-hover">
           <thead>
             <tr>
-              <th>id</th>
+              <th><input id="checkboxRemove" type="checkbox"></th>
+              <th>Account</th>
               <th>Name</th>
-              <th>teacher</th>
-              <th>number</th>
             </tr>
           </thead>
           <tbody>
@@ -141,54 +149,7 @@
         </table>
       </div>
     </div>
-    <!-- The new Modal -->
-    <div class="modal" id="newModal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form class="form-horizontal needs-validation" id="newForm" novalidate>
-            <!-- Modal Header -->
-            <div class="modal-header">
-              <button type="button" class="gwt-Button close" data-dismiss="modal">
-                <span class="pficon pficon-close"></span>
-              </button>
-              <h4 class="modal-title">Add student to curiculum</h4>
-            </div>
-    
-            <!-- Modal body -->
-            <div class="modal-body">
-              <div class="container-fluid">
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Curriculum name:</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" name="curriculum_name" id="newCurriculum_name" required>
-                  </div>
-                </div>
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Teacher:</label>
-                  <div class="col-sm-6">
-                    <select class="form-control" name="teacher" id="newTeacher">
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Max number of people:</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" name="maxnum" id="newMaxnum" required>
-                  </div>
-                </div>
-              </div>
-            </div>
-    
-            <!-- Modal footer -->
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">OK</button>
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
+   
     <!-- The edit Modal -->
     <div class="modal" id="editModal">
       <div class="modal-dialog">
@@ -201,7 +162,7 @@
               </button>
               <h4 class="modal-title">Edit Pod</h4>
             </div>
-    
+
             <!-- Modal body -->
             <div class="modal-body">
               <div class="container-fluid">
@@ -226,7 +187,7 @@
                 </div>
               </div>
             </div>
-    
+
             <!-- Modal footer -->
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">OK</button>
@@ -256,7 +217,7 @@
                 <div class="col-sm-12">
                   <div class="alert alert-warning">
                     <span class="pficon pficon-info pficon-warning-triangle-o"></span>
-                    <div>Are you sure you want to delete the following items?<br/>It will remove all students in this curriculum.</div>
+                    <div>Are you sure you want to delete this curriculum?<br/>It will remove all students in this curriculum.</div>
                   </div>
                 </div>
               </div>
@@ -358,33 +319,16 @@
           <!-- Modal body -->
           <div class="modal-body">
             <div class="container-fluid">
-              <h4></h4>
               <div class="row">
-                <div class="col-sm-6">
-                  <div class="input-group">
-                    <span class="input-group-addon">Search:</span>
-                    <input type="text" class="form-control" id="removeTable_search">
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="removeTable_searchClean"><i class="fa fa-close"></i> </button>
-                    </span>
+                <div class="col-sm-12">
+                  <div class="alert alert-warning">
+                    <span class="pficon pficon-info pficon-warning-triangle-o"></span>
+                    <div>Are you sure you want to remove the following items?</div>
                   </div>
                 </div>
               </div>
               <div class="row">
-                <div class="col-sm-12">
-                  <div class="table-responsive">          
-                    <table class="table table-bordered table-striped" id="remove_table">
-                      <thead>
-                        <tr>
-                          <th><input id="checkboxRemove" type="checkbox"></th>
-                          <th>Account</th>
-                          <th>Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                    </table>
-                  </div>
+                <div class="col-sm-12" id="removeItems">
                 </div>
               </div>
             </div>
@@ -405,88 +349,74 @@
     $(document).ready(function(){
       $.fn.dataTable.ext.classes.sPageButton = 'btn btn-default GKGFBNLBANB';
 
-      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'GetUsers', '*');
       parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'editUsers', '*');
 
-      getCurriculumsList();
+      var classId = "<?php echo $classId ?>";
 
-      $('#newBtn').click(function(){
-        $('#newCurriculum_name').val('');
-        $('#newMaxnum').val('60');
-      });
+      var curriculum = $.ajax({
+          type: "POST",
+          url: "function.php?f=getCurriculum",
+          data: { classId: classId },
+          async: false
+        }).responseText;
+      var json = JSON.parse(curriculum);
+      var className = json[1];
+      var classTeacher = json[2];
+      var classMaxnum = json[3];
+      var classNum = json[4];
+      
+      $('#curriculum_name').html(className);
+      $('#teacher').html(classTeacher);
+      $('#maxnum').html(classMaxnum);
 
-      $('#newForm').submit(function(event) {
-        event.preventDefault();
-        if (validateNewForm() != 'false') {
-          createCurriculum();
-        }
-      });
+      getCurriculumStudent(classId);
 
       $('#editBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var name = table.rows(rows).data().pluck('name').toArray()[0];
-        var teacher = table.rows(rows).data().pluck('teacher').toArray()[0];
-        var maxnum = table.rows(rows).data().pluck('maxnum').toArray()[0];
-        $('#editCurriculum_name').val(name);
-        $('#editTeacher option[value="'+teacher+'"]').attr("selected",true);
-        $('#editMaxnum').val(maxnum);
+        $('#editCurriculum_name').val(className);
+        $('#editTeacher option[value="'+classTeacher+'"]').attr("selected",true);
+        $('#editMaxnum').val(classMaxnum);
       });
 
       $('#editForm').submit(function(event) {
         event.preventDefault();
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
         if (validateEditForm() != 'false') {
-          editCurriculum(id);
-          table.ajax.reload();
-          table.rows('.selected').deselect();
+          editCurriculum(classId);
+          location.reload();
         }
       });
 
       $('#deleteBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var names = table.rows(rows).data().pluck('name').toArray();
-        $('#deleteItems').html('');
-        for (name of names) {
-          $('#deleteItems').append("<div>- " + name + "</div>");
-        }
+        $('#deleteItems').html("<div>- " + className + "</div>");
       });
 
       $('#deleteModal button[type=submit]').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray();
+        var id = [classId];
         deleteCurriculum(id);
-        table.ajax.reload();
-        table.rows('.selected').deselect();
+        window.location.href = "curriculum.html";
       });
 
       $('#addBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
-        var name = table.rows(rows).data().pluck('name').toArray()[0];
-        $('#addModal .modal-body h4').html(name);
-        var data = table.rows().data().toArray();
+        $('#addModal .modal-body h4').html(className);
+        var data = $.ajax({
+          type: "GET", 
+          url: "function.php?f=getCurriculumsList",
+          async: false
+        }).responseText;
+        var json = JSON.parse(data).data;
+        console.log(json);
         $('#curriculum_select').html('');
         $('#curriculum_select').append('<option value="all">All</option>');
-        for (var i=0; i<data.length; i++) {
-           if (data[i].id !== id) $('#curriculum_select').append('<option value="'+data[i].id+'">'+data[i].name+'</option>');
+        for (var i=0; i<json.length; i++) {
+           if (json[i].id != classId) $('#curriculum_select').append('<option value="'+json[i].id+'">'+json[i].name+'</option>');
         }
         $('#checkboxAdd').prop('checked', false);
-        addCurriculumList(id, 'all');
+        addCurriculumList(classId, 'all');
       });
 
       $('#curriculum_select').change(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
         var select = $(this).val();
         $('#checkboxAdd').prop('checked', false);
-        addCurriculumList(id, select);
+        addCurriculumList(classId, select);
       });
 
       $('#checkboxAdd').click(function(){
@@ -499,37 +429,32 @@
       });
 
       $('#addModal button[type=submit]').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var classId = table.rows(rows).data().pluck('id').toArray()[0];
-        var maxnum = table.rows(rows).data().pluck('maxnum').toArray()[0]
-        var num = table.rows(rows).data().pluck('num').toArray()[0]
         var students = $('#add_table td input:checkbox:checked').map(function(){
               return $(this).val();
             }).get();
         if (students.length == 0) {
           alert('Please choose student!');
-        } else if (students.length + num > maxnum) {
+        } else if (students.length + classNum > classMaxnum) {
           alert('More than the maximum number');
         } else {
           addCurriculum(classId, students);
-          table.ajax.reload();
+         $('#students_table').DataTable().ajax.reload();
         }
       });
 
       $('#removeBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
+        var table = $("#students_table").DataTable();
         var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
-        var name = table.rows(rows).data().pluck('name').toArray()[0];
-        $('#removeModal .modal-body h4').html(name);
-        $('#checkboxRemove').prop('checked', false);
-        removeCurriculumList(id);
+        var selects = table.rows(rows).data().toArray();
+        $('#removeItems').html('');
+        for (select of selects) {
+          $('#removeItems').append("<div>- "+ select.account +"  " + select.name + "</div>");
+        }
       });
 
       $('#checkboxRemove').click(function(){
-        var table = $("#remove_table").DataTable();
-        $('#remove_table input:checkbox').prop('checked', this.checked);
+        var table = $("#students_table").DataTable();
+        $('#students_table input:checkbox').prop('checked', this.checked);
         if ($('#checkboxRemove').is(':checked'))
           table.rows().select();
         else
@@ -537,17 +462,15 @@
       });
 
       $('#removeModal button[type=submit]').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var classId = table.rows(rows).data().pluck('id').toArray()[0];
-        var students = $('#remove_table td input:checkbox:checked').map(function(){
+        var students = $('#students_table td input:checkbox:checked').map(function(){
               return $(this).val();
             }).get();
         if (students.length == 0) {
           alert('Please choose student!');
         } else {
           removeCurriculum(classId, students);
-          table.ajax.reload();
+         $('#students_table').DataTable().ajax.reload();
+         $('#checkboxRemove').prop('checked', false);
         }
       });
     });

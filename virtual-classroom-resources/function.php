@@ -1,4 +1,26 @@
 <?php
+
+function getCurriculum() {
+  require('require/dbconfig.php');
+  $classId = $_POST['classId'];
+  if (!empty($classId)) {
+    try {
+      $conn = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $conn->prepare("SELECT id, name, teacher, maxnum, COALESCE(num, 0) FROM class LEFT JOIN ( SELECT class, COUNT(student) AS num FROM class_group GROUP BY class) AS g ON class.id = g.class WHERE id = $classId;");
+      $stmt->execute();
+      $result = $stmt->fetch();
+      echo json_encode($result);
+    }
+    catch(PDOException $e) {
+      echo "Error: " . $e->getMessage();
+    }
+    $conn = null;
+  } else {
+    echo 'fail';
+  }  
+}
+
 function getCurriculumsList() {
   require('require/dbconfig.php');
   $requestData = $_REQUEST;
@@ -54,6 +76,31 @@ function createCurriculum() {
     echo 'fail';
   }
 }
+
+function editCurriculum() {
+  require('require/dbconfig.php');
+  $id = htmlspecialchars($_POST['id'], ENT_QUOTES, 'UTF-8');
+  $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
+  $teacher = htmlspecialchars($_POST['teacher'], ENT_QUOTES, 'UTF-8');
+  $maxnum = htmlspecialchars($_POST['maxnum'], ENT_QUOTES, 'UTF-8');
+  if (!empty($id) && !empty($name) && !empty($teacher) && !empty($maxnum)) {
+    try {
+      $conn = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $conn->prepare("UPDATE class SET name='$name', teacher='$teacher', maxnum=$maxnum WHERE id=$id;");
+      $stmt->execute();
+      echo "ok"; 
+    }
+    catch(PDOException $e)
+    {
+      echo "Error: " . $e->getMessage();
+    }
+    $conn = null;
+  } else {
+    echo 'fail';
+  }
+}
+
 
 function deleteCurriculum() {
   require('require/dbconfig.php');
@@ -144,6 +191,138 @@ function addCurriculum() {
   } else {
     echo 'fail';
   }
+}
+
+function getCurriculumStudent() {
+  require('require/dbconfig.php');
+  $requestData = $_REQUEST;
+  $classId = $_POST['classId'];
+  if (!empty($classId)) {
+    try {
+      $conn = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $conn->prepare("SELECT id, account, name FROM class_group,student WHERE class_group.student = student.id AND class = $classId;");
+      $stmt->execute();
+      $totalData = $stmt->rowCount();
+      $totalFiltered = $totalData;
+      $data = array();
+      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $nestedData=array();
+        $nestedData['id'] = $row['id'];
+        $nestedData['account'] = $row['account'];
+        $nestedData['name'] = $row['name'];
+        $data[] = $nestedData;
+      }
+      $json_data = array(
+        "draw" => intval($requestData['draw']),
+        "recordsTotal" => intval($totalData),
+        "recordsFiltered" => intval($totalFiltered),
+        "data" => $data
+      );
+      echo json_encode($json_data);
+    }
+    catch(PDOException $e) {
+      echo "Error: " . $e->getMessage();
+    }
+    $conn = null;
+  } else {
+    echo 'fail';
+  }
+}
+
+function removeCurriculum() {
+  require('require/dbconfig.php');
+  $classId = $_POST['classId'];
+  $students = $_POST['students'];
+  if (!empty($classId) || !empty($students)) {
+    try {
+      $conn = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $conn->beginTransaction();
+      foreach ($students as $student) {
+        $conn->exec("DELETE FROM class_group WHERE class = $classId AND student = $student;");
+      }
+      $conn->commit();
+      echo "ok";
+    }
+    catch(PDOException $e)
+    {
+      $conn->rollback();
+      echo "Error: " . $e->getMessage();
+    }
+    $conn = null;
+  } else {
+    echo 'fail';
+  }
+}
+
+function getCurriculumName() {
+ require('require/dbconfig.php');
+ try {
+   $conn = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+   $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+   $stmt = $conn->prepare("SELECT id, name FROM class;");
+   $stmt->execute();
+   $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+   echo json_encode($result);
+ }
+ catch(PDOException $e) {
+   echo "Error: " . $e->getMessage();
+ }
+ $conn = null;
+}
+
+function addImageList() {
+  require('require/dbconfig.php');
+  $requestData = $_REQUEST;
+  $tempId = $_POST['tempId'];
+  $classId = $_POST['classId'];
+  if (!empty($tempId) || !empty($classId)) {
+    try {
+      $conn = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+      $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $stmt = $conn->prepare("SELECT id, account, name FROM class_group,student WHERE class_group.student = student.id AND class = $classId AND student NOT IN (SELECT student FROM student_images WHERE template_id = '$tempId');");
+      $stmt->execute();
+      $totalData = $stmt->rowCount();
+      $totalFiltered = $totalData;
+      $data = array();
+      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $nestedData=array();
+        $nestedData['id'] = $row['id'];
+        $nestedData['account'] = $row['account'];
+        $nestedData['name'] = $row['name'];
+        $data[] = $nestedData;
+      }
+      $json_data = array(
+        "draw" => intval($requestData['draw']),
+        "recordsTotal" => intval($totalData),
+        "recordsFiltered" => intval($totalFiltered),
+        "data" => $data
+      );
+      echo json_encode($json_data);
+    }
+    catch(PDOException $e) {
+      echo "Error: " . $e->getMessage();
+    }
+    $conn = null;
+  } else {
+    echo 'fail';
+  }
+}
+
+function createStudentImage() {
+  require('require/dbconfig.php');
+   $tempId = htmlspecialchars($_POST['tempId'], ENT_QUOTES, 'UTF-8');
+   $tempName = htmlspecialchars($_POST['tempName'], ENT_QUOTES, 'UTF-8');
+   $diskId = htmlspecialchars($_POST['diskId'], ENT_QUOTES, 'UTF-8');
+   $imageId = htmlspecialchars($_POST['imageId'], ENT_QUOTES, 'UTF-8');
+   $diskSize = htmlspecialchars($_POST['diskSize'], ENT_QUOTES, 'UTF-8');
+   $storagedomain = htmlspecialchars($_POST['storagedomain'], ENT_QUOTES, 'UTF-8');
+   $vnic = htmlspecialchars($_POST['vnic'], ENT_QUOTES, 'UTF-8');
+   $students = $_POST['students'];
+   //if (!empty($tempId) || !empty($classId)) { 
+   echo "$tempId, $tempName, $diskId, $imageId, $diskSize, $storagedomain, $vnic, $students";
+   //}
 }
 
 if (function_exists($_GET['f'])) {

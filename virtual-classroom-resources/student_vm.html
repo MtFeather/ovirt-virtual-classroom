@@ -98,7 +98,7 @@
         <div class="col-sm-12">
           <ol class="breadcrumb">
               <li class="active">Virtual Class</li>
-              <li class="active"><a href="#curriculum">Curriculum</a></li>
+              <li class="active"><a href="#curriculum">Student VM</a></li>
             </ol>
         </div>
       </div>
@@ -108,7 +108,7 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="input-group">
-                  <span class="input-group-addon">Curriculums:</span>
+                  <span class="input-group-addon">Template:</span>
                   <input type="text" class="form-control" id="SearchPanelView_searchStringInput">
                   <span class="input-group-btn">
                     <button type="button" class="btn btn-default" id="SearchPanelView_searchClean"><i class="fa fa-close"></i> </button>
@@ -127,65 +127,19 @@
         </div>
       </div>
       <div class="GKGFBNLBCNB table-responsive">
-        <table id="curriculums_table" class="table table-bordered table-striped table-hover">
+        <table id="templates_table" class="table table-bordered table-striped table-hover">
           <thead>
             <tr>
-              <th>id</th>
               <th>Name</th>
-              <th>teacher</th>
-              <th>number</th>
+              <th>Disk Alias</th>
+              <th>Disk ID</th>
+              <th>Disk Size</th>
+              <th>Image ID</th>
             </tr>
           </thead>
           <tbody>
           </tbody>
         </table>
-      </div>
-    </div>
-    <!-- The new Modal -->
-    <div class="modal" id="newModal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form class="form-horizontal needs-validation" id="newForm" novalidate>
-            <!-- Modal Header -->
-            <div class="modal-header">
-              <button type="button" class="gwt-Button close" data-dismiss="modal">
-                <span class="pficon pficon-close"></span>
-              </button>
-              <h4 class="modal-title">Add student to curiculum</h4>
-            </div>
-    
-            <!-- Modal body -->
-            <div class="modal-body">
-              <div class="container-fluid">
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Curriculum name:</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" name="curriculum_name" id="newCurriculum_name" required>
-                  </div>
-                </div>
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Teacher:</label>
-                  <div class="col-sm-6">
-                    <select class="form-control" name="teacher" id="newTeacher">
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Max number of people:</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" name="maxnum" id="newMaxnum" required>
-                  </div>
-                </div>
-              </div>
-            </div>
-    
-            <!-- Modal footer -->
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">OK</button>
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            </div>
-          </form>
-        </div>
       </div>
     </div>
 
@@ -291,43 +245,62 @@
           <!-- Modal body -->
           <div class="modal-body">
             <div class="container-fluid">
-              <h4></h4>
+              <h4>Template Name: <span></span></h4>
               <div class="row">
                 <div class="col-sm-12">
                   <div class="input-group">
                     <span class="input-group-addon">Curriculums:</span>
-                    <select class="form-control" name="curriculum_select" id="curriculum_select">
-                      <option value="all">All</option>
+                    <select class="form-control" name="curriculum_select" id="curriculum">
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group">
+                    <span class="input-group-addon">Storage Domain:</span>
+                    <select class="form-control" name="storage_select" id="storage_select">
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group">
+                    <span class="input-group-addon">vnic:</span>
+                    <select class="form-control" name="vnic_select" id="vnic_select">
                     </select>
                   </div>
                 </div>
               </div>
               <hr style="margin-top: 5px; margin-bottom: 10px;"/>
-              <div class="row">
-                <div class="col-sm-6">
-                  <div class="input-group">
-                    <span class="input-group-addon">Search:</span>
-                    <input type="text" class="form-control" id="addTable_search">
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-default" id="addTable_searchClean"><i class="fa fa-close"></i> </button>
-                    </span>
+              <div class="collapse" id="add_collapse">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="input-group">
+                      <span class="input-group-addon">Search:</span>
+                      <input type="text" class="form-control" id="addTable_search">
+                      <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" id="addTable_searchClean"><i class="fa fa-close"></i> </button>
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-sm-12">
-                  <div class="table-responsive">          
-                    <table class="table table-bordered table-striped" id="add_table">
-                      <thead>
-                        <tr>
-                          <th><input id="checkboxAdd" type="checkbox"></th>
-                          <th>Account</th>
-                          <th>Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                    </table>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="table-responsive">          
+                      <table class="table table-bordered table-striped" id="add_table">
+                        <thead>
+                          <tr>
+                            <th><input id="checkboxAdd" type="checkbox"></th>
+                            <th>Account</th>
+                            <th>Name</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -405,88 +378,33 @@
     $(document).ready(function(){
       $.fn.dataTable.ext.classes.sPageButton = 'btn btn-default GKGFBNLBANB';
 
-      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'GetUsers', '*');
-      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'editUsers', '*');
-
-      getCurriculumsList();
-
-      $('#newBtn').click(function(){
-        $('#newCurriculum_name').val('');
-        $('#newMaxnum').val('60');
-      });
-
-      $('#newForm').submit(function(event) {
-        event.preventDefault();
-        if (validateNewForm() != 'false') {
-          createCurriculum();
-        }
-      });
-
-      $('#editBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var name = table.rows(rows).data().pluck('name').toArray()[0];
-        var teacher = table.rows(rows).data().pluck('teacher').toArray()[0];
-        var maxnum = table.rows(rows).data().pluck('maxnum').toArray()[0];
-        $('#editCurriculum_name').val(name);
-        $('#editTeacher option[value="'+teacher+'"]').attr("selected",true);
-        $('#editMaxnum').val(maxnum);
-      });
-
-      $('#editForm').submit(function(event) {
-        event.preventDefault();
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
-        if (validateEditForm() != 'false') {
-          editCurriculum(id);
-          table.ajax.reload();
-          table.rows('.selected').deselect();
-        }
-      });
-
-      $('#deleteBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var names = table.rows(rows).data().pluck('name').toArray();
-        $('#deleteItems').html('');
-        for (name of names) {
-          $('#deleteItems').append("<div>- " + name + "</div>");
-        }
-      });
-
-      $('#deleteModal button[type=submit]').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray();
-        deleteCurriculum(id);
-        table.ajax.reload();
-        table.rows('.selected').deselect();
-      });
+      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getTemplatesList', '*');
+      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getStorageDomainsList', '*');
+      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getVNicProfilesList', '*');
 
       $('#addBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
+        var table = $("#templates_table").DataTable();
         var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
-        var name = table.rows(rows).data().pluck('name').toArray()[0];
-        $('#addModal .modal-body h4').html(name);
-        var data = table.rows().data().toArray();
-        $('#curriculum_select').html('');
-        $('#curriculum_select').append('<option value="all">All</option>');
-        for (var i=0; i<data.length; i++) {
-           if (data[i].id !== id) $('#curriculum_select').append('<option value="'+data[i].id+'">'+data[i].name+'</option>');
-        }
-        $('#checkboxAdd').prop('checked', false);
-        addCurriculumList(id, 'all');
+        var name = table.rows(rows).data().pluck('t_name').toArray()[0];
+        $("#add_collapse").slideUp();
+        $('#addModal .modal-body h4 span').html(name);
+        $('#curriculum').html('');
+        getCurriculumName();
       });
 
-      $('#curriculum_select').change(function(){
-        var table = $("#curriculums_table").DataTable();
+      $('#curriculum').change(function(){
+        var table = $("#templates_table").DataTable();
         var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
-        var select = $(this).val();
+        var t_id = table.rows(rows).data().pluck('t_id').toArray()[0];
+        var c_select = $('#curriculum').val();
         $('#checkboxAdd').prop('checked', false);
-        addCurriculumList(id, select);
+        if (c_select == "null") {
+          $("#add_collapse").slideUp();
+          $('#add_table').DataTable().clear().draw();
+        } else {
+          addImageList(t_id, c_select);
+          $("#add_collapse").slideDown();
+        }
       });
 
       $('#checkboxAdd').click(function(){
@@ -499,55 +417,30 @@
       });
 
       $('#addModal button[type=submit]').click(function(){
-        var table = $("#curriculums_table").DataTable();
+        var table = $("#templates_table").DataTable();
         var rows = table.rows( { selected: true } ).indexes();
-        var classId = table.rows(rows).data().pluck('id').toArray()[0];
-        var maxnum = table.rows(rows).data().pluck('maxnum').toArray()[0]
-        var num = table.rows(rows).data().pluck('num').toArray()[0]
+        var data = table.rows(rows).data().toArray()[0];
+        var t_id = data.t_id;
+        var t_name = data.t_name;
+        var d_id = data.d_id;
+        var i_id = data.i_id;
+        var d_size = data.d_size;
+        var storagedomain = $('#storage_select').val();
+        var vnic = $('#vnic_select').val();
         var students = $('#add_table td input:checkbox:checked').map(function(){
-              return $(this).val();
-            }).get();
-        if (students.length == 0) {
-          alert('Please choose student!');
-        } else if (students.length + num > maxnum) {
-          alert('More than the maximum number');
-        } else {
-          addCurriculum(classId, students);
-          table.ajax.reload();
-        }
-      });
-
-      $('#removeBtn').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var id = table.rows(rows).data().pluck('id').toArray()[0];
-        var name = table.rows(rows).data().pluck('name').toArray()[0];
-        $('#removeModal .modal-body h4').html(name);
-        $('#checkboxRemove').prop('checked', false);
-        removeCurriculumList(id);
-      });
-
-      $('#checkboxRemove').click(function(){
-        var table = $("#remove_table").DataTable();
-        $('#remove_table input:checkbox').prop('checked', this.checked);
-        if ($('#checkboxRemove').is(':checked'))
-          table.rows().select();
-        else
-          table.rows().deselect();
-      });
-
-      $('#removeModal button[type=submit]').click(function(){
-        var table = $("#curriculums_table").DataTable();
-        var rows = table.rows( { selected: true } ).indexes();
-        var classId = table.rows(rows).data().pluck('id').toArray()[0];
-        var students = $('#remove_table td input:checkbox:checked').map(function(){
-              return $(this).val();
+              var arr = [];
+              arr.push({
+                id: $(this).val(),
+                name: $(this).closest('td').next('td').html()
+              });
+              return arr;
             }).get();
         if (students.length == 0) {
           alert('Please choose student!');
         } else {
-          removeCurriculum(classId, students);
-          table.ajax.reload();
+          console.log(students);
+          createStudentImage(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students);
+          //table.ajax.reload();
         }
       });
     });

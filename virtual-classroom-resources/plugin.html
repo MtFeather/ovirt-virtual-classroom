@@ -15,11 +15,16 @@
         api.addPrimaryMenuContainer('Virtual Class', 'virtual-class',
           {
             priority: 1, // negative priority will be the top menu item.
-            icon: 'fa-cube' // font-awesome trophy icon.
+            icon: 'fa-book' // font-awesome trophy icon.
           }
         );
+
         api.addSecondaryMenuPlace('virtual-class', 'Curriculum', 'curriculum',
           '/ovirt-ui-plugins/virtual-classroom/virtual-classroom-resources/curriculum.html'
+        );
+
+        api.addSecondaryMenuPlace('virtual-class', 'Student VM', 'student-vm',
+          '/ovirt-ui-plugins/virtual-classroom/virtual-classroom-resources/student_vm.html'
         );
       }
 
@@ -36,6 +41,92 @@
               users[index] = data.user[index].name;
             }
             formWindow && formWindow.getUsers(users);
+          }
+        });
+      }
+
+      function editUser(apiEntryPoint) {
+        var users = new Array();
+        var usersUrl = apiEntryPoint + "/users";
+        jQuery.ajax({
+          type: "GET",
+          dataType: "json",
+          url: usersUrl,
+          headers: {'Authorization': 'Bearer ' + api.ssoToken()},
+          success: function(data) {
+            for (var index in data.user) {
+              users[index] = data.user[index].name;
+            }
+            formWindow && formWindow.editUsers(users);
+          }
+        });
+      }
+
+      function getTemplatesList(apiEntryPoint) {
+        var templates = new Array();
+        var templatesUrl = apiEntryPoint + "/templates?follow=disk_attachments.disk";
+        jQuery.ajax({
+          type: "GET",
+          dataType: "json",
+          url: templatesUrl,
+          headers: {'Authorization': 'Bearer ' + api.ssoToken()},
+          success: function(data) {
+            for (var index in data.template) {
+              if(data.template[index].id !== "00000000-0000-0000-0000-000000000000" && data.template[index].status == "ok" && data.template[index].disk_attachments.disk_attachment[0].disk.format == "cow") {
+                templates.push({
+                  t_id: data.template[index].id,
+                  t_name: data.template[index].name,
+                  d_id: data.template[index].disk_attachments.disk_attachment[0].disk.id,
+                  d_name: data.template[index].disk_attachments.disk_attachment[0].disk.alias,
+                  i_id: data.template[index].disk_attachments.disk_attachment[0].disk.image_id,
+                  d_size: data.template[index].disk_attachments.disk_attachment[0].disk.provisioned_size
+                });
+              }
+            }
+            formWindow && formWindow.getTemplatesList(templates);
+          }
+        });
+      }
+
+      function getStorageDomainsList(apiEntryPoint) {
+        var storagedomains = new Array();
+        var storagedomainsUrl = apiEntryPoint + "/storagedomains";
+        jQuery.ajax({
+          type: "GET",
+          dataType: "json",
+          url: storagedomainsUrl,
+          headers: {'Authorization': 'Bearer ' + api.ssoToken()},
+          success: function(data) {
+            for (var index in data.storage_domain) {
+              if(data.storage_domain[index].type == "data" && data.storage_domain[index].external_status == "ok") {
+                storagedomains.push({
+                  id: data.storage_domain[index].id,
+                  name: data.storage_domain[index].name,
+                  available: data.storage_domain[index].available
+                });
+              }
+            }
+            formWindow && formWindow.getStorageDomainsList(storagedomains);
+          }
+        });
+      }
+
+      function getVNicProfilesList(apiEntryPoint) {
+        var vnics = new Array();
+        var vnicsUrl = apiEntryPoint + "/vnicprofiles";
+        jQuery.ajax({
+          type: "GET",
+          dataType: "json",
+          url: vnicsUrl,
+          headers: {'Authorization': 'Bearer ' + api.ssoToken()},
+          success: function(data) {
+            for (var index in data.vnic_profile) {
+              vnics.push({
+                id: data.vnic_profile[index].id,
+                name: data.vnic_profile[index].name
+              });
+            }
+            formWindow && formWindow.getVNicProfilesList(vnics);
           }
         });
       }
@@ -59,11 +150,26 @@
             if (tuple[0] !== VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX) {
                 return;
           }
-
           switch (tuple[1]) {
             case 'GetUsers':
               formWindow = sourceWindow;
               getUser(config.apiEntryPoint);
+              break;
+            case 'editUsers':
+              formWindow = sourceWindow;
+              editUser(config.apiEntryPoint);
+              break;
+            case 'getTemplatesList':
+              formWindow = sourceWindow;
+              getTemplatesList(config.apiEntryPoint);
+              break;
+            case 'getStorageDomainsList':
+              formWindow = sourceWindow;
+              getStorageDomainsList(config.apiEntryPoint);
+              break;
+            case 'getVNicProfilesList':
+              formWindow = sourceWindow;
+              getVNicProfilesList(config.apiEntryPoint);
               break;
           }
         }
