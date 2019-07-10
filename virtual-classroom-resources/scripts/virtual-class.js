@@ -435,7 +435,12 @@ function getTemplatesList(templates) {
   var table = $("#templates_table").DataTable({
     "data": templates,
     "columns": [
-       { "data": "t_name" },
+       { 
+         "data": "t_name",
+         "render": function ( data, type, row, meta ) {
+           return "<a href='student_vm.php?id="+row.t_id+"'>"+data+"</a>";
+         }
+       },
        { "data": "d_name" },
        { "data": "d_id" },
        { 
@@ -593,19 +598,184 @@ function addImageList(t_id, c_select) {
   });
 }
 
-function createStudentImage(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students){
+function createStudentVM(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students){
   $.ajax({
-    url: "function.php?f=createStudentImage",
+    url: "function.php?f=createStudentVM",
     method: "POST",
     data: { tempId: t_id, tempName: t_name, diskId: d_id, imageId: i_id, diskSize: d_size, storagedomain: storagedomain, vnic: vnic, students: students },
     success: function(result) {
-     console.log(result);
-     // if (result == 'ok') {
-     //   alert('Remove Student Successfully.');
-     //   $('#removeModal').modal('hide');
-     // } else {
-     //   alert('Remove Student Fail!!');
-     // }
+      if (result == 'ok') {
+        alert('Now creating student vm.\nPlease check later.');
+        $('#addModal').modal('hide');
+      } else {
+        alert('Create student vm fail!!');
+      }
     }
   });
+}
+
+function removeStudentVMList(id){
+   var table = $("#remove_table").DataTable({
+    "ajax": {
+      url: "function.php?f=removeStudentVMList",
+      type: "POST",
+      data: { tempId: id }
+    },
+    "columns": [
+       { 
+         "data": "id",
+         "render": function ( data, type, row, meta ) {
+           return '<input type="checkbox" value="'+data+'">';
+         }
+       },
+       { "data": "account" },
+       { "data": "name" },
+    ],
+    "dom": "<'content-view-pf-pagination clearfix'"+
+           "<'form-group'B>"+
+           "<'form-group'<i><'btn-group btn-pagination'p>>>t",
+    "pagingType": "simple_numbers",
+    "pageLength": 10,
+    "language": {
+      "zeroRecords": "No matching records found",
+      "info": "_START_ - _END_",
+      "paginate": {
+        "previous": '<i class="fa fa-angle-left"></i>',
+        "next": '<i class="fa fa-angle-right"></i>'
+      },
+      "select": {
+        rows: ""
+      }
+    },
+    "order": [[ 1, "asc" ]],
+    "columnDefs": [
+      {
+        targets: 0,
+        orderable: false
+      }
+    ],
+    select: {
+      items: 'row',
+      style: 'multi',
+      selector: 'td:first-child input:checkbox'
+    },
+    buttons: [
+      {
+        "text": '<i class="fa fa-refresh"></i>',
+        "className": 'btn btn-default',
+        "action": function ( e, dt, node, config ) {
+          dt.ajax.reload();
+        }
+      }
+    ]
+  });
+ 
+  $('#removeTable_search').keyup(function(){
+    table.search($(this).val()).draw();
+  });
+
+  $('#removeTable_searchClean').click(function(){
+    $('#removeTable_search').val('');
+    table.search('').draw();
+  });
+}
+
+function removeStudentVM(students) {
+  $.ajax({
+    url: "function.php?f=removeStudentVM",
+    method: "POST",
+    data: { students: students },
+    success: function(result) {
+      if (result == 'ok') {
+        alert('Remove Student VM Successfully.');
+        $('#removeModal').modal('hide');
+      } else {
+        alert('Remove Student VM Fail!!');
+      }
+    }
+  });
+}
+
+function getTemplateStudent(id) {
+   var table = $("#students_table").DataTable({
+    "ajax": {
+      url: "function.php?f=getTemplateStudent",
+      type: "POST",
+      data: { tempId: id }
+    },
+    "columns": [
+       { 
+         "data": "id",
+         "render": function ( data, type, row, meta ) {
+           return '<input type="checkbox" value="'+data+'">';
+         }
+       },
+       { "data": "account" },
+       { "data": "name" },
+       { 
+         "data": "vm_name",
+         "render": function ( data, type, row, meta ) {
+           return '<a href="/ovirt-engine/webadmin/?locale=en_US#vms-general;name='+data+'" target="_parent">'+data+'</a>';
+         }
+       },
+       { "data": "disk_id" },
+       { "data": "image_id" }
+    ],
+    "dom": "<'content-view-pf-pagination clearfix'"+
+           "<'form-group'B>"+
+           "<'form-group'<i><'btn-group btn-pagination'p>>>t",
+    "pagingType": "simple_numbers",
+    "pageLength": 100,
+    "language": {
+      "zeroRecords": "No matching records found",
+      "info": "_START_ - _END_",
+      "paginate": {
+        "previous": '<i class="fa fa-angle-left"></i>',
+        "next": '<i class="fa fa-angle-right"></i>'
+      },
+      "select": {
+        rows: ""
+      }
+    },
+    "order": [[ 1, "asc" ]],
+    "columnDefs": [
+      {
+        targets: 0,
+        orderable: false
+      }
+    ],
+    select: {
+      items: 'row',
+      style: 'multi',
+      selector: 'td:first-child input:checkbox'
+    },
+    buttons: [
+      {
+        "text": '<i class="fa fa-refresh"></i>',
+        "className": 'btn btn-default',
+        "action": function ( e, dt, node, config ) {
+          dt.ajax.reload();
+        }
+      }
+    ]
+  });
+ 
+  $('#SearchPanelView_searchStringInput').keyup(function(){
+    table.search($(this).val()).draw();
+  });
+
+  $('#SearchPanelView_searchClean').click(function(){
+    $('#SearchPanelView_searchStringInput').val('');
+    table.search('').draw();
+  });
+
+  table.on( 'select.dt deselect.dt', function (){
+    var rows = table.rows( { selected: true } ).indexes().length;
+    if(rows === 0){
+      $('#removeBtn').attr('disabled', true);
+    } else {
+      $('#removeBtn').attr('disabled', false);
+    }
+  });
+
 }

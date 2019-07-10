@@ -23,8 +23,8 @@
           '/ovirt-ui-plugins/virtual-classroom/virtual-classroom-resources/curriculum.html'
         );
 
-        api.addSecondaryMenuPlace('virtual-class', 'Student VM', 'student-vm',
-          '/ovirt-ui-plugins/virtual-classroom/virtual-classroom-resources/student_vm.html'
+        api.addSecondaryMenuPlace('virtual-class', 'Template Images', 'template_images',
+          '/ovirt-ui-plugins/virtual-classroom/virtual-classroom-resources/template.html'
         );
       }
 
@@ -131,6 +131,12 @@
         });
       }
 
+      function getTemplate(apiEntryPoint) {
+        console.log(apiEntryPoint);
+        formWindow && formWindow.getTemplate(apiEntryPoint, api.ssoToken());
+      }
+
+
       api.options({
         // Configure source origin(s), i.e. protocol://domain:port
         // from which HTML5 message events will be accepted
@@ -170,6 +176,10 @@
             case 'getVNicProfilesList':
               formWindow = sourceWindow;
               getVNicProfilesList(config.apiEntryPoint);
+              break;
+            case 'getTemplate':
+              formWindow = sourceWindow;
+              getTemplate(config.apiEntryPoint);
               break;
           }
         }

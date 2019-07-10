@@ -2,7 +2,8 @@
 # Directory Path
 resources_dir="/dev/shm/ovirt-cache/"
 session_file="${resources_dir}/session.txt"
-storage_path="/gocloud_fs/ovirt_data"
+storage_path="/gocloud_fs"
+storage_nfs="nfs_IP:${storage_path}"
 
 # Command Path
 psql="/opt/rh/rh-postgresql10/root/usr/bin/psql -U gocloud"

@@ -33,20 +33,6 @@ function _psql() {
 	/opt/rh/rh-postgresql10/root/usr/bin/psql -U gocloud -At -F " " -c "${1}" 
 }
 
-function _pg_dump() {
-	/opt/rh/rh-postgresql10/root/usr/bin/pg_dump -U gocloud -t "${1}" --data-only --column-inserts > "${2}"
-}
-
-function _ssh() {
-	/usr/bin/expect -c "
-	spawn ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 ${1} \"${2}\";
-	expect \"name:\";
-	send \"vdsm@ovirt\r\";
-	expect \"password:\";
-	send \"shibboleth\r\";
-	interact" 
-}
-
 function _create_vm() {
 	_session
 	bearer=$( cat ${session_file} )
@@ -107,4 +93,23 @@ function _create_vnic() {
         --header "Prefer: persistent-auth" \
         --data "${1}" \
         "${url}/vms/${2}/nics"
+}
+
+function _remove_vm() {
+	_session
+        bearer=$( cat ${session_file} )
+        curl \
+        --silent \
+        --insecure \
+        --request DELETE \
+        --header "Version: 4" \
+        --header "Accept: application/xml" \
+        --header "Content-Type: application/xml" \
+        --header "Authorization: Bearer ${bearer}" \
+        --header "Prefer: persistent-auth" \
+        --data " \
+<action> 
+  <force>true</force> 
+</action>" \
+        "${url}/vms/${1}"
 }

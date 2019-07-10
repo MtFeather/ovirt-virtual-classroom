@@ -1,19 +1,20 @@
 #!/bin/bash
 source ./config.sh
 source ./function.sh
-temp_name="$1"
-temp_disk_id="$2"
-temp_image_id="$3"
-temp_disk_size="$4"
-storagedomain="$5"
-vnic="$6"
-student="$7"
+temp_id="$1"
+temp_name="$2"
+temp_disk_id="$3"
+temp_image_id="$4"
+temp_disk_size="$5"
+storagedomain="$6"
+vnic="$7"
+student_id="$8"
+student_name="$9"
 
-echo "${temp_name}, ${temp_disk_id}, ${temp_image_id}, ${temp_disk_size}, ${storagedomain}, ${student}"
-
+vm_name="${temp_name}_${student_name}"
 vm_xml=$( _create_vm "\
 <vm>
-  <name>${temp_name}_${student}</name>
+  <name>${vm_name}</name>
   <cluster>
     <name>Default</name>
   </cluster>
@@ -22,9 +23,7 @@ vm_xml=$( _create_vm "\
   </template>
 </vm>
 ")
-#echo ${vm_xml}
 vm_id=$(xmllint --xpath "/vm/@id" - <<< ${vm_xml} | sed 's/ id="\([^"]*\)"/\1/g' )
-echo "vm_id=${vm_id}"
 
 diskattachment_xml=$( _create_image " \
 <disk_attachment>
@@ -33,7 +32,7 @@ diskattachment_xml=$( _create_image " \
   <active>true</active>
   <disk>
     <format>cow</format>
-    <name>${temp_name}_${student}</name>
+    <name>${vm_name}</name>
     <provisioned_size>${temp_disk_size}</provisioned_size>
     <storage_domains>
       <storage_domain id='${storagedomain}'/>
@@ -44,21 +43,22 @@ diskattachment_xml=$( _create_image " \
 "${vm_id}" )
 
 disk_id=$( xmllint --xpath "/disk_attachment/@id" - <<< ${diskattachment_xml} | sed 's/ id="\([^"]*\)"/\1/g' )
-echo "disk_id=${disk_id}"
 
 disk_xml=$( _get_disk "${disk_id}" )
 image_id=$( xmllint --xpath "/disk/image_id/text()" - <<< ${disk_xml} )
 
+check=$( mount | grep "${storage_path}" )
+if [ "${check}" == "" ]; then
+	[ ! -d ${storage_path} ] && mkdir ${storage_path}
+	mount -t nfs ${storage_nfs} ${storage_path}
+fi
+
 while true;
 do
-	#disk_status=$( xmllint --xpath "/disk/status/text()" - <<< ${disk_xml} )
-        #echo ${disk_status}
-        [ -f "${storage_path}/${storagedomain}/images/${disk_id}/${image_id}" ] && break;
+        [ -f "${storage_path}/ovirt_data/${storagedomain}/images/${disk_id}/${image_id}" ] && break
 done
 
-echo ${image_id}
-
-qemu-img create -f qcow2 -b ../${temp_disk_id}/${temp_image_id} ${storage_path}/${storagedomain}/images/${disk_id}/${image_id}
+qemu-img create -f qcow2 -b ../${temp_disk_id}/${temp_image_id} ${storage_path}/ovirt_data/${storagedomain}/images/${disk_id}/${image_id}
 
 _create_vnic " \
 <nic>
@@ -66,3 +66,5 @@ _create_vnic " \
   <vnic_profile id='${vnic}'/>
 </nic>
 " "${vm_id}" &> /dev/null
+
+_psql "INSERT INTO student_vms (student, vm_name, vm_id, template_id, disk_id, image_id, create_time) VALUES (${student_id}, '${vm_name}', '${vm_id}', '${temp_id}', '${disk_id}', '${image_id}', now());" &> /dev/null

@@ -1,5 +1,5 @@
 <?php
-  $classId = htmlspecialchars($_GET['id'], ENT_QUOTES, 'UTF-8');
+  $tempId = htmlspecialchars($_GET['id'], ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html>
@@ -101,15 +101,15 @@
         <div class="col-sm-12">
           <ol class="breadcrumb">
               <li class="active">Virtual Class</li>
-              <li class="active"><a href="curriculum.html">Curriculum</a></li>
-              <li class="active"><a href="javascript:;" style="font-size: 28px;" id="curriculum_name"></a></li>
+              <li class="active"><a href="template.html">Template Images</a></li>
+              <li class="active"><a href="javascript:;" style="font-size: 28px;" id="template_name"></a></li>
             </ol>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-12">
-          <span>Teacher: <i id="teacher"></i>, </span>
-          <span>Max number of peaple: <i id="maxnum"></i></span>
+          <span>Disk Name: <i id="disk_name"></i>, </span>
+          <span>Disk Size: <i id="disk_size"></i> G</span>
         </div>
       </div>
       <div class="toolbar-pf">
@@ -142,6 +142,9 @@
               <th><input id="checkboxRemove" type="checkbox"></th>
               <th>Account</th>
               <th>Name</th>
+              <th>VM Name</th>
+              <th>Disk ID</th>
+              <th>Image ID</th>
             </tr>
           </thead>
           <tbody>
@@ -257,8 +260,25 @@
                 <div class="col-sm-12">
                   <div class="input-group">
                     <span class="input-group-addon">Curriculums:</span>
-                    <select class="form-control" name="curriculum_select" id="curriculum_select">
-                      <option value="all">All</option>
+                    <select class="form-control" name="curriculum_select" id="curriculum">
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group">
+                    <span class="input-group-addon">Storage Domain:</span>
+                    <select class="form-control" name="storage_select" id="storage_select">
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="input-group">
+                    <span class="input-group-addon">vnic:</span>
+                    <select class="form-control" name="vnic_select" id="vnic_select">
                     </select>
                   </div>
                 </div>
@@ -346,77 +366,34 @@
   </body>
   <script type="text/javascript" src="./scripts/virtual-class.js"></script>
   <script>
+    var t_id = "<?php echo $tempId ?>";
+    var t_name,d_id,d_name,i_id,d_size;
     $(document).ready(function(){
       $.fn.dataTable.ext.classes.sPageButton = 'btn btn-default GKGFBNLBANB';
 
-      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'editUsers', '*');
+      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getTemplate', '*');
+      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getStorageDomainsList', '*');
+      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getVNicProfilesList', '*');
 
-      var classId = "<?php echo $classId ?>";
-
-      var curriculum = $.ajax({
-          type: "POST",
-          url: "function.php?f=getCurriculum",
-          data: { classId: classId },
-          async: false
-        }).responseText;
-      var json = JSON.parse(curriculum);
-      var className = json[1];
-      var classTeacher = json[2];
-      var classMaxnum = json[3];
-      var classNum = json[4];
-      
-      $('#curriculum_name').html(className);
-      $('#teacher').html(classTeacher);
-      $('#maxnum').html(classMaxnum);
-
-      getCurriculumStudent(classId);
-
-      $('#editBtn').click(function(){
-        $('#editCurriculum_name').val(className);
-        $('#editTeacher option[value="'+classTeacher+'"]').attr("selected",true);
-        $('#editMaxnum').val(classMaxnum);
-      });
-
-      $('#editForm').submit(function(event) {
-        event.preventDefault();
-        if (validateEditForm() != 'false') {
-          editCurriculum(classId);
-          location.reload();
-        }
-      });
-
-      $('#deleteBtn').click(function(){
-        $('#deleteItems').html("<div>- " + className + "</div>");
-      });
-
-      $('#deleteModal button[type=submit]').click(function(){
-        var id = [classId];
-        deleteCurriculum(id);
-        window.location.href = "curriculum.html";
-      });
+      getTemplateStudent(t_id);
 
       $('#addBtn').click(function(){
-        $('#addModal .modal-body h4').html(className);
-        var data = $.ajax({
-          type: "GET", 
-          url: "function.php?f=getCurriculumsList",
-          async: false
-        }).responseText;
-        var json = JSON.parse(data).data;
-        console.log(json);
-        $('#curriculum_select').html('');
-        $('#curriculum_select').append('<option value="all">All</option>');
-        for (var i=0; i<json.length; i++) {
-           if (json[i].id != classId) $('#curriculum_select').append('<option value="'+json[i].id+'">'+json[i].name+'</option>');
-        }
-        $('#checkboxAdd').prop('checked', false);
-        addCurriculumList(classId, 'all');
+        $("#add_collapse").slideUp();
+        $('#addModal .modal-body h4').html(t_name);
+        $('#curriculum').html('');
+        getCurriculumName();
       });
 
-      $('#curriculum_select').change(function(){
-        var select = $(this).val();
+      $('#curriculum').change(function(){
+        var c_select = $('#curriculum').val();
         $('#checkboxAdd').prop('checked', false);
-        addCurriculumList(classId, select);
+        if (c_select == "null") {
+          $("#add_collapse").slideUp();
+          $('#add_table').DataTable().clear().draw();
+        } else {
+          addImageList(t_id, c_select);
+          $("#add_collapse").slideDown();
+        }
       });
 
       $('#checkboxAdd').click(function(){
@@ -429,16 +406,20 @@
       });
 
       $('#addModal button[type=submit]').click(function(){
+        var storagedomain = $('#storage_select').val();
+        var vnic = $('#vnic_select').val();
         var students = $('#add_table td input:checkbox:checked').map(function(){
-              return $(this).val();
+              var arr = [];
+              arr.push({
+                id: $(this).val(),
+                name: $(this).closest('td').next('td').html()
+              });
+              return arr;
             }).get();
         if (students.length == 0) {
           alert('Please choose student!');
-        } else if (students.length + classNum > classMaxnum) {
-          alert('More than the maximum number');
         } else {
-          addCurriculum(classId, students);
-         $('#students_table').DataTable().ajax.reload();
+          createStudentVM(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students);
         }
       });
 
@@ -468,11 +449,35 @@
         if (students.length == 0) {
           alert('Please choose student!');
         } else {
-          removeCurriculum(classId, students);
-         $('#students_table').DataTable().ajax.reload();
-         $('#checkboxRemove').prop('checked', false);
+          removeStudentVM(students);
+          $('#students_table').DataTable().ajax.reload();
+          $('#checkboxRemove').prop('checked', false);
         }
       });
     });
+
+    function getTemplate(apiEntryPoint, Token) {
+      var templatesUrl = apiEntryPoint + "/templates?follow=disk_attachments.disk";
+      jQuery.ajax({
+        type: "GET",
+        dataType: "json",
+        url: templatesUrl,
+        headers: {'Authorization': 'Bearer ' + Token},
+        success: function(data) {
+          for (var index in data.template) {
+            if(data.template[index].id == t_id) {
+              t_name = data.template[index].name,
+              d_id = data.template[index].disk_attachments.disk_attachment[0].disk.id,
+              d_name = data.template[index].disk_attachments.disk_attachment[0].disk.alias,
+              i_id = data.template[index].disk_attachments.disk_attachment[0].disk.image_id,
+              d_size = data.template[index].disk_attachments.disk_attachment[0].disk.provisioned_size/1024/1024/1024
+              $('#template_name').html(t_name);
+              $('#disk_name').html(d_name);
+              $('#disk_size').html(d_size);
+            }
+          }
+        }
+      });
+    }
   </script>
 </html>
