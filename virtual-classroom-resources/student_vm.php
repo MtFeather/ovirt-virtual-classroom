@@ -420,6 +420,7 @@
           alert('Please choose student!');
         } else {
           createStudentVM(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students);
+          $('#students_table').DataTable().ajax.reload();
         }
       });
 
@@ -449,9 +450,7 @@
         if (students.length == 0) {
           alert('Please choose student!');
         } else {
-          removeStudentVM(students);
-          $('#students_table').DataTable().ajax.reload();
-          $('#checkboxRemove').prop('checked', false);
+          parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'checkVMStatus', '*');
         }
       });
     });
@@ -475,6 +474,34 @@
               $('#disk_name').html(d_name);
               $('#disk_size').html(d_size);
             }
+          }
+        }
+      });
+    }
+
+    function checkVMStatus(apiEntryPoint,Token) {
+      var uplist = new Array();
+      var students = $('#students_table td input:checkbox:checked').map(function(){
+            return $(this).val();
+          }).get();
+      var vmsUrl = apiEntryPoint + "/vms?search=status!=down";
+      $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: vmsUrl,
+        headers: {'Authorization': 'Bearer ' + Token},
+        success: function(data) {
+          for (var index in data.vm) {
+            if(students.includes(data.vm[index].id)) {
+              uplist.push(data.vm[index].name);
+            }
+          }
+          if(uplist.length !== 0){
+            alert('Please close vm first.\nThe following VM is Running:\n'+uplist.join('\n'));
+          } else {
+            removeStudentVM(students);
+            $('#students_table').DataTable().ajax.reload();
+            $('#checkboxRemove').prop('checked', false);
           }
         }
       });

@@ -98,7 +98,7 @@
         <div class="col-sm-12">
           <ol class="breadcrumb">
               <li class="active">Virtual Class</li>
-              <li class="active"><a href="#curriculum">Student VM</a></li>
+              <li class="active"><a href="#template_images">Template Images</a></li>
             </ol>
         </div>
       </div>
@@ -118,7 +118,6 @@
             </div>
           </div>
           <div class="form-group">
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#newModal" id="newBtn">New</button>
             <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editModal" id="editBtn" disabled>Edit</button>
             <button type="button" class="btn btn-default" data-toggle="modal" data-target="#deleteModal" id="deleteBtn" disabled>Delete</button>
             <button type="button" class="btn btn-default" data-toggle="modal" data-target="#addModal" id="addBtn" disabled>Add student</button>
@@ -143,54 +142,6 @@
       </div>
     </div>
 
-    <!-- The edit Modal -->
-    <div class="modal" id="editModal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form class="form-horizontal needs-validation" id="editForm" novalidate>
-            <!-- Modal Header -->
-            <div class="modal-header">
-              <button type="button" class="gwt-Button close" data-dismiss="modal">
-                <span class="pficon pficon-close"></span>
-              </button>
-              <h4 class="modal-title">Edit Pod</h4>
-            </div>
-    
-            <!-- Modal body -->
-            <div class="modal-body">
-              <div class="container-fluid">
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Curriculum name:</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" name="curriculum_name" id="editCurriculum_name" required>
-                  </div>
-                </div>
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Teacher:</label>
-                  <div class="col-sm-6">
-                    <select class="form-control" name="teacher" id="editTeacher">
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group resources-policy">
-                  <label class="control-label col-sm-6 text-left">Max number of people:</label>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control" name="maxnum" id="editMaxnum" required>
-                  </div>
-                </div>
-              </div>
-            </div>
-    
-            <!-- Modal footer -->
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">OK</button>
-              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
     <!-- The delete Modal -->
     <div class="modal" id="deleteModal">
       <div class="modal-dialog">
@@ -200,7 +151,7 @@
             <button type="button" class="gwt-Button close" data-dismiss="modal">
               <span class="pficon pficon-close"></span>
             </button>
-            <h4 class="modal-title">Delete Curriculum(s)</h4>
+            <h4 class="modal-title">Delete Template(s)</h4>
           </div>
     
           <!-- Modal body -->
@@ -210,7 +161,7 @@
                 <div class="col-sm-12">
                   <div class="alert alert-warning">
                     <span class="pficon pficon-info pficon-warning-triangle-o"></span>
-                    <div>Are you sure you want to delete the following items?<br/>It will remove all students in this curriculum.</div>
+                    <div>Are you sure you want to delete the following items?<br/>It will remove all students vm in this template.</div>
                   </div>
                 </div>
               </div>
@@ -382,6 +333,16 @@
       parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getStorageDomainsList', '*');
       parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getVNicProfilesList', '*');
 
+      $('#deleteBtn').click(function(){
+        var table = $("#templates_table").DataTable();
+        var rows = table.rows( { selected: true } ).indexes();
+        var names = table.rows(rows).data().pluck('t_name').toArray();
+        $('#deleteItems').html('');
+        for (name of names) {
+          $('#deleteItems').append("<div>- " + name + "</div>");
+        }
+      });
+
       $('#addBtn').click(function(){
         var table = $("#templates_table").DataTable();
         var rows = table.rows( { selected: true } ).indexes();
@@ -468,9 +429,63 @@
         if (students.length == 0) {
           alert('Please choose student!');
         } else {
-          removeStudentVM(students);
+          parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'checkVMStatus', '*');
         }
       });
     });
+
+    function checkVMStatus(apiEntryPoint,Token) {
+      var uplist = new Array();
+      var students = $('#remove_table td input:checkbox:checked').map(function(){
+            return $(this).val();
+          }).get();
+      var vmsUrl = apiEntryPoint + "/vms?search=status!=down";
+      $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: vmsUrl,
+        headers: {'Authorization': 'Bearer ' + Token},
+        success: function(data) {
+          for (var index in data.vm) {
+            if(students.includes(data.vm[index].id)) {
+              uplist.push(data.vm[index].name);
+            }
+          }
+          if(uplist.length !== 0){
+            alert('Please close vm first.\nThe following VM is Running:\n'+uplist.join('\n'));
+          } else {
+            removeStudentVM(students);
+          }
+        }
+      });
+    }
+
+    function checkVMStatus(apiEntryPoint,Token) {
+      var uplist = new Array();
+      var students = $('#students_table td input:checkbox:checked').map(function(){
+            return $(this).val();
+          }).get();
+      var vmsUrl = apiEntryPoint + "/vms?search=status!=down";
+      $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: vmsUrl,
+        headers: {'Authorization': 'Bearer ' + Token},
+        success: function(data) {
+          for (var index in data.vm) {
+            if(students.includes(data.vm[index].id)) {
+              uplist.push(data.vm[index].name);
+            }
+          }
+          if(uplist.length !== 0){
+            alert('Please close vm first.\nThe following VM is Running:\n'+uplist.join('\n'));
+          } else {
+            removeStudentVM(students);
+            $('#students_table').DataTable().ajax.reload();
+            $('#checkboxRemove').prop('checked', false);
+          }
+        }
+      });
+    }
   </script>
 </html>

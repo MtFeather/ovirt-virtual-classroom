@@ -132,10 +132,12 @@
       }
 
       function getTemplate(apiEntryPoint) {
-        console.log(apiEntryPoint);
         formWindow && formWindow.getTemplate(apiEntryPoint, api.ssoToken());
       }
 
+      function checkVMStatus(apiEntryPoint) {
+        formWindow && formWindow.checkVMStatus(apiEntryPoint, api.ssoToken());
+      }
 
       api.options({
         // Configure source origin(s), i.e. protocol://domain:port
@@ -180,6 +182,10 @@
             case 'getTemplate':
               formWindow = sourceWindow;
               getTemplate(config.apiEntryPoint);
+              break;
+            case 'checkVMStatus':
+              formWindow = sourceWindow;
+              checkVMStatus(config.apiEntryPoint);
               break;
           }
         }
