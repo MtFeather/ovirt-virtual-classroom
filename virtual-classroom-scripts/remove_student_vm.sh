@@ -2,6 +2,8 @@
 source ./config.sh
 source ./function.sh
 
+wait $!
+
 vm_id="$1"
 _remove_vm "${vm_id}"
 

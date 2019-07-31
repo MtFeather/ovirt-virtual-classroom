@@ -88,29 +88,6 @@
         });
       }
 
-      function getStorageDomainsList(apiEntryPoint) {
-        var storagedomains = new Array();
-        var storagedomainsUrl = apiEntryPoint + "/storagedomains";
-        jQuery.ajax({
-          type: "GET",
-          dataType: "json",
-          url: storagedomainsUrl,
-          headers: {'Authorization': 'Bearer ' + api.ssoToken()},
-          success: function(data) {
-            for (var index in data.storage_domain) {
-              if(data.storage_domain[index].type == "data" && data.storage_domain[index].external_status == "ok") {
-                storagedomains.push({
-                  id: data.storage_domain[index].id,
-                  name: data.storage_domain[index].name,
-                  available: data.storage_domain[index].available
-                });
-              }
-            }
-            formWindow && formWindow.getStorageDomainsList(storagedomains);
-          }
-        });
-      }
-
       function getVNicProfilesList(apiEntryPoint) {
         var vnics = new Array();
         var vnicsUrl = apiEntryPoint + "/vnicprofiles";
@@ -170,10 +147,6 @@
             case 'getTemplatesList':
               formWindow = sourceWindow;
               getTemplatesList(config.apiEntryPoint);
-              break;
-            case 'getStorageDomainsList':
-              formWindow = sourceWindow;
-              getStorageDomainsList(config.apiEntryPoint);
               break;
             case 'getVNicProfilesList':
               formWindow = sourceWindow;

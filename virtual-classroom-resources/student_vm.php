@@ -268,16 +268,7 @@
               <div class="row">
                 <div class="col-sm-12">
                   <div class="input-group">
-                    <span class="input-group-addon">Storage Domain:</span>
-                    <select class="form-control" name="storage_select" id="storage_select">
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-sm-12">
-                  <div class="input-group">
-                    <span class="input-group-addon">vnic:</span>
+                    <span class="input-group-addon">vNic:</span>
                     <select class="form-control" name="vnic_select" id="vnic_select">
                     </select>
                   </div>
@@ -372,7 +363,6 @@
       $.fn.dataTable.ext.classes.sPageButton = 'btn btn-default GKGFBNLBANB';
 
       parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getTemplate', '*');
-      parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getStorageDomainsList', '*');
       parent.postMessage(VIRTUAL_CLASS_PLUGIN_MESSAGE_PREFIX + VIRTUAL_CLASS_PLUGIN_MESSAGE_DELIM + 'getVNicProfilesList', '*');
 
       getTemplateStudent(t_id);
@@ -381,6 +371,8 @@
         $("#add_collapse").slideUp();
         $('#addModal .modal-body h4').html(t_name);
         $('#curriculum').html('');
+        $('#checkboxAdd').prop('checked', false);
+        $('#add_table').DataTable().clear().draw();
         getCurriculumName();
       });
 
@@ -398,17 +390,20 @@
 
       $('#checkboxAdd').click(function(){
         var table = $("#add_table").DataTable();
-        $('#add_table input:checkbox').prop('checked', this.checked);
-        if ($('#checkboxAdd').is(':checked'))
+        var allPages = table.cells().nodes();
+        if ($('#checkboxAdd').is(':checked')) {
+          $(allPages).find('input:checkbox').prop('checked', true);
           table.rows().select();
-        else
+        } else {
+          $(allPages).find('input:checkbox').prop('checked', false);
           table.rows().deselect();
+        }
       });
 
       $('#addModal button[type=submit]').click(function(){
-        var storagedomain = $('#storage_select').val();
         var vnic = $('#vnic_select').val();
-        var students = $('#add_table td input:checkbox:checked').map(function(){
+        var allPages = $("#add_table").DataTable().cells().nodes();
+        var students = $(allPages).find('input:checkbox:checked').map(function(){
               var arr = [];
               arr.push({
                 id: $(this).val(),
@@ -419,7 +414,7 @@
         if (students.length == 0) {
           alert('Please choose student!');
         } else {
-          createStudentVM(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students);
+          createStudentVM(t_id, t_name, vnic, students);
           $('#students_table').DataTable().ajax.reload();
         }
       });
@@ -436,15 +431,19 @@
 
       $('#checkboxRemove').click(function(){
         var table = $("#students_table").DataTable();
-        $('#students_table input:checkbox').prop('checked', this.checked);
-        if ($('#checkboxRemove').is(':checked'))
+        var allPages = table.cells().nodes();
+        if ($('#checkboxRemove').is(':checked')){
+          $(allPages).find('input:checkbox').prop('checked', true);
           table.rows().select();
-        else
+        } else {
+          $(allPages).find('input:checkbox').prop('checked', false);
           table.rows().deselect();
+        }
       });
 
       $('#removeModal button[type=submit]').click(function(){
-        var students = $('#students_table td input:checkbox:checked').map(function(){
+        var allPages = $("#students_table").DataTable().cells().nodes();
+        var students = $(allPages).find('input:checkbox:checked').map(function(){
               return $(this).val();
             }).get();
         if (students.length == 0) {

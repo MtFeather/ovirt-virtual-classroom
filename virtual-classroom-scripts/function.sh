@@ -113,3 +113,17 @@ function _remove_vm() {
 </action>" \
         "${url}/vms/${1}"
 }
+
+function _vm_disk_xml() {
+        _session
+        bearer=$( cat ${session_file} )
+        curl \
+        --silent \
+        --insecure \
+        --header "Version: 4" \
+        --header "Accept: application/xml" \
+        --header "Content-Type: application/xml" \
+        --header "Authorization: Bearer ${bearer}" \
+        --header "Prefer: persistent-auth" \
+        "${url}/vms/${1}/diskattachments?follow=disk"
+}

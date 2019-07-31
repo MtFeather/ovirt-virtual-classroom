@@ -12,7 +12,7 @@
 
      // Default configuration associated with the plugin
      "config": {
-        "allowedOrigins": ["https://127.0.0.1"],
+        "allowedOrigins": ["https://127.0.0.1""],
         "apiEntryPoint": "https://127.0.0.1/ovirt-engine/api"
      }
 }

@@ -503,18 +503,6 @@ function getTemplatesList(templates) {
   });
 }
 
-function getStorageDomainsList(storagedomains) {
-  for (var i=0; i<storagedomains.length; i++) {
-    $('#storage_select').append('<option value="'+storagedomains[i].id+'">'+storagedomains[i].name+' ('+storagedomains[i].available/1024/1024/1024+' GiB free)</option>');
-  }
-}
-
-function getVNicProfilesList(vnics) {
-  for (var i=0; i<vnics.length; i++) {
-    $('#vnic_select').append('<option value="'+vnics[i].id+'">'+vnics[i].name+'</option>');
-  }
-}
-
 function getCurriculumName() {
   $.ajax({
     url: "function.php?f=getCurriculumName",
@@ -527,6 +515,12 @@ function getCurriculumName() {
       }
     }
   });  
+}
+
+function getVNicProfilesList(vnics) {
+  for (var i=0; i<vnics.length; i++) {
+    $('#vnic_select').append('<option value="'+vnics[i].id+'">'+vnics[i].name+'</option>');
+  }
 }
 
 function addImageList(t_id, c_select) {
@@ -598,11 +592,11 @@ function addImageList(t_id, c_select) {
   });
 }
 
-function createStudentVM(t_id, t_name, d_id, i_id, d_size, storagedomain, vnic, students){
+function createStudentVM(t_id, t_name, vnic, students){
   $.ajax({
     url: "function.php?f=createStudentVM",
     method: "POST",
-    data: { tempId: t_id, tempName: t_name, diskId: d_id, imageId: i_id, diskSize: d_size, storagedomain: storagedomain, vnic: vnic, students: students },
+    data: { tempId: t_id, tempName: t_name, vnic: vnic, students: students },
     success: function(result) {
       if (result == 'ok') {
         alert('Now creating student vm.\nPlease check later.');

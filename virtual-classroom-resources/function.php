@@ -314,16 +314,12 @@ function createStudentVM() {
   require('require/dbconfig.php');
   $tempId = htmlspecialchars($_POST['tempId'], ENT_QUOTES, 'UTF-8');
   $tempName = htmlspecialchars($_POST['tempName'], ENT_QUOTES, 'UTF-8');
-  $diskId = htmlspecialchars($_POST['diskId'], ENT_QUOTES, 'UTF-8');
-  $imageId = htmlspecialchars($_POST['imageId'], ENT_QUOTES, 'UTF-8');
-  $diskSize = htmlspecialchars($_POST['diskSize'], ENT_QUOTES, 'UTF-8');
-  $storagedomain = htmlspecialchars($_POST['storagedomain'], ENT_QUOTES, 'UTF-8');
   $vnic = htmlspecialchars($_POST['vnic'], ENT_QUOTES, 'UTF-8');
   $students = $_POST['students'];
   if (!empty($tempId) || !empty($tempName) || !empty($diskId) || !empty($imageId) || !empty($diskSize) || !empty($storagedomain) || !empty($vnic) || !empty($students)) {
     chdir('../virtual-classroom-scripts');
     foreach ($students as $student) {
-      exec("sudo ./create_student_vm.sh $tempId $tempName $diskId $imageId $diskSize $storagedomain $vnic ".$student['id']." ".$student['name']."> /dev/null 2>&1 &");
+      exec("sudo ./create_student_vm.sh $tempId $tempName $vnic ".$student['id']." ".$student['name']." > /dev/null 2>&1 & ");
     }
     echo "ok";
   }
@@ -371,6 +367,7 @@ function removeStudentVM() {
   $students = $_POST['students'];
   if (!empty($students)) {
     chdir('../virtual-classroom-scripts');
+    exec("sudo echo 'starto'> /dev/null 2>&1 &");
     foreach ($students as $student) {
       exec("sudo ./remove_student_vm.sh $student > /dev/null 2>&1 &");
     }
